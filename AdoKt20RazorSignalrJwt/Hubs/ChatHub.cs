@@ -49,7 +49,7 @@ public class ChatHub : Hub
 
 		await Clients.All.SendAsync("ReceiveMessage", new
 		{
-			user = user.Username,
+			username = user.Username,
 			text = message.Text,
 			createdAtUtc = message.CreatedAtUtc,
 		});

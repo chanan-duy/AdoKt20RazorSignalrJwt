@@ -18,21 +18,7 @@
 			        aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
-			<div class="navbar-collapse collapse d-sm-flex justify-content-between">
-				<div></div>
-
-				<ul class="navbar-nav align-items-sm-center">
-					@if (User.Identity?.IsAuthenticated == true)
-					{
-						<li class="nav-item">
-							<span class="nav-link text-secondary">user: @User.Identity.Name</span>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" asp-page="/Account/Logout">logout</a>
-						</li>
-					}
-				</ul>
-			</div>
+			<div class="navbar-collapse collapse"></div>
 		</div>
 	</nav>
 </header>

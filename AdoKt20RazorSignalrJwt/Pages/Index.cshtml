@@ -5,108 +5,81 @@
 	ViewData["Title"] = "chat demo";
 }
 
-@if (User.Identity?.IsAuthenticated == true)
-{
-	<div class="chat-page">
-		<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-			<h1 class="h3 mb-0">chat</h1>
-			<div class="text-secondary">user: @Model.CurrentUsername</div>
-		</div>
+<div id="authView" class="auth-page">
+	<div class="card auth-card">
+		<div class="card-body p-4">
+			<h1 class="h3 mb-4">login</h1>
 
-		<div class="card chat-card mb-3">
-			<div class="card-body">
+			<div id="loginError" class="text-danger mb-3 d-none"></div>
+
+			<form id="loginForm" novalidate>
 				<div class="mb-3">
-					<label for="messageInput" class="form-label">message</label>
-					<textarea id="messageInput" class="form-control" rows="3" maxlength="400" placeholder="write a message"></textarea>
+					<label for="usernameInput" class="form-label">user</label>
+					<input id="usernameInput" name="username" class="form-control" autocomplete="username" maxlength="32"/>
 				</div>
 
-				<div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-					<div id="chatStatus" class="chat-status text-secondary small">connecting...</div>
-					<button id="sendButton" type="button" class="btn btn-primary">send</button>
+				<div class="mb-4">
+					<label for="passwordInput" class="form-label">password</label>
+					<input id="passwordInput" name="password" type="password" class="form-control" autocomplete="current-password"
+					       maxlength="64"/>
 				</div>
-			</div>
-		</div>
 
-		<div class="card messages-card">
-			<div class="card-body">
-				<h2 class="h5 mb-3">messages</h2>
+				<button id="loginButton" type="submit" class="btn btn-primary">login</button>
+			</form>
 
-				<div id="messagesList" class="messages-list">
-					@if (Model.Messages.Count == 0)
-					{
-						<div id="emptyState" class="alert alert-light border mb-0">nothing yet</div>
-					}
-
-					@foreach (var message in Model.Messages)
-					{
-						<div class="message-item">
-							<div class="message-meta">
-								<strong>@message.Username</strong>
-								<span>@message.CreatedAtLocal.ToString("yyyy-MM-dd HH:mm:ss")</span>
-							</div>
-							<p class="message-text">@message.Text</p>
-						</div>
-					}
-				</div>
+			<div class="mt-4 pt-3 border-top">
+				<div class="small text-secondary mb-2">accounts</div>
+				<div class="small">user1 / pwd1</div>
+				<div class="small">user2 / pwd2</div>
+				<div class="small">user3 / pwd3</div>
 			</div>
 		</div>
 	</div>
-}
-else
-{
-	<div class="auth-page">
-		<div class="card auth-card">
-			<div class="card-body p-4">
-				<h1 class="h3 mb-4">login</h1>
+</div>
 
-				@if (!string.IsNullOrWhiteSpace(Model.LoginErrorMessage))
-				{
-					<div class="text-danger mb-3">@Model.LoginErrorMessage</div>
-				}
+<div id="chatView" class="chat-page d-none">
+	<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+		<div>
+			<h1 class="h3 mb-1">chat</h1>
+			<div class="text-secondary">user: <span id="currentUser"></span></div>
+		</div>
+		<button id="logoutButton" type="button" class="btn btn-outline-secondary">logout</button>
+	</div>
 
-				<form method="post" asp-page-handler="Login" novalidate>
-					<div class="mb-3">
-						<label asp-for="LoginInput.Username" class="form-label"></label>
-						<input asp-for="LoginInput.Username" class="form-control" autocomplete="username"/>
-						<span asp-validation-for="LoginInput.Username" class="text-danger"></span>
-					</div>
+	<div class="card chat-card mb-3">
+		<div class="card-body">
+			<div class="mb-3">
+				<label for="messageInput" class="form-label">message</label>
+				<textarea id="messageInput" class="form-control" rows="3" maxlength="400" placeholder="write a message"></textarea>
+			</div>
 
-					<div class="mb-4">
-						<label asp-for="LoginInput.Password" class="form-label"></label>
-						<input asp-for="LoginInput.Password" class="form-control" autocomplete="current-password"/>
-						<span asp-validation-for="LoginInput.Password" class="text-danger"></span>
-					</div>
-
-					<button type="submit" class="btn btn-primary">login</button>
-				</form>
-
-				<div class="mt-4 pt-3 border-top">
-					<div class="small text-secondary mb-2">accounts</div>
-					<div class="small">user1 / pwd1</div>
-					<div class="small">user2 / pwd2</div>
-					<div class="small">user3 / pwd3</div>
-				</div>
+			<div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+				<div id="chatStatus" class="chat-status text-secondary small">connecting...</div>
+				<button id="sendButton" type="button" class="btn btn-primary">send</button>
 			</div>
 		</div>
 	</div>
-}
+
+	<div class="card messages-card">
+		<div class="card-body">
+			<h2 class="h5 mb-3">messages</h2>
+			<div id="messagesList" class="messages-list">
+				<div id="emptyState" class="alert alert-light border mb-0">nothing yet</div>
+			</div>
+		</div>
+	</div>
+</div>
 
 @section Scripts {
-	@if (User.Identity?.IsAuthenticated == true)
-	{
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"
-		        crossorigin="anonymous"
-		        referrerpolicy="no-referrer"></script>
-		<script src="~/js/chat.js" asp-append-version="true"></script>
-		<script>
-			window.chatPage.init({
-				currentUser: @Html.Raw(JsonSerializer.Serialize(Model.CurrentUsername)),
-				hubUrl: @Html.Raw(JsonSerializer.Serialize(Url.Content("~/chatHub")))
-			});
-		</script>
-	}
-	else
-	{
-		<partial name="_ValidationScriptsPartial"/>
-	}
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"
+	        crossorigin="anonymous"
+	        referrerpolicy="no-referrer"></script>
+	<script src="~/js/chat.js" asp-append-version="true"></script>
+	<script>
+		window.chatPage.init({
+			loginUrl: @Html.Raw(JsonSerializer.Serialize(Url.Content("~/api/auth/login"))),
+			messagesUrl: @Html.Raw(JsonSerializer.Serialize(Url.Content("~/api/chat/messages"))),
+			hubUrl: @Html.Raw(JsonSerializer.Serialize(Url.Content("~/chatHub")))
+		});
+	</script>
 }
